@@ -29,7 +29,7 @@ else
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthorization();
 //app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
