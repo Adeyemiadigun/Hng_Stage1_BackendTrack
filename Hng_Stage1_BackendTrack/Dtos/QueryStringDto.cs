@@ -13,7 +13,11 @@ namespace Hng_Stage1_BackendTrack.Dtos
     }
     public record QueryResponseDto
     {
-        public List<StringModel> Data { get; set; }
+        [JsonPropertyName("data")]
+
+        public List<StringResponseDto> Data { get; set; }
+        [JsonPropertyName("count")]
+
         public int Count => Data.Count;
         public Dictionary<string, object> Filters_Applied { get; set; } = new ();
 

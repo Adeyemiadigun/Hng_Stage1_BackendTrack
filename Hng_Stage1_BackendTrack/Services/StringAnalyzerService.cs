@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -112,10 +113,28 @@ namespace Hng_Stage1_BackendTrack.Services
                     (string.IsNullOrWhiteSpace(stringDto.contains_character?.ToString()) ||
                      x.Value.Contains(stringDto.contains_character.Value.ToString(), StringComparison.OrdinalIgnoreCase))
                 ).ToList();
-
+            var res =  data.Select(x => new StringResponseDto
+            {
+                Id = x.Id,
+                Value = x.Value,
+                Created_At = x.CreatedAt,
+                Properties = new PropertiesDto
+                {
+                    Length = x.length,
+                    Is_Palindrome = x.IsPalindrome,
+                    Unique_Characters = x.UniqueCharacterCount,
+                    Word_Count = x.WordCount,
+                    Sha256_Hash = x.ShaHash,
+                    Character_Frequency_Map =  x.Value
+                .ToLower()
+                .Where(char.IsLetterOrDigit)
+                .GroupBy(c => c)
+                .ToDictionary(g => g.Key, g => g.Count())
+                }
+            }).ToList();
             return new QueryResponseDto
             {
-                Data = data,
+                Data = res,
                 Filters_Applied = GetAppliedFilters(stringDto)
             };
         }
