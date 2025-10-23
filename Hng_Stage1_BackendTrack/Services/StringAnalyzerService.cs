@@ -146,6 +146,7 @@ namespace Hng_Stage1_BackendTrack.Services
             if (stringToDelete is null)
                 return false;
             InMemoryStore.InMemoryStores.Remove(stringToDelete);
+
             return true;
         }
     }
