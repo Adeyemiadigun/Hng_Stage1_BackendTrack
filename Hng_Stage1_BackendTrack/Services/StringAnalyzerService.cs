@@ -12,12 +12,12 @@ namespace Hng_Stage1_BackendTrack.Services
     {
         public StringModel AnalyzeString(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new BadRequestException("Invalid request body or missing \"value\" field");
+           
 
             string hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLower();
             if (InMemoryStore.InMemoryStores.Any(x => x.ShaHash == hash))
-                throw new ConflictException("String already exists in the system");
+                return null!;
+
             var newString = new StringModel
             {
                 length = value.Length,
@@ -32,7 +32,7 @@ namespace Hng_Stage1_BackendTrack.Services
         }
         public StringModel GetByValue(string value)
         {
-            return InMemoryStore.InMemoryStores.FirstOrDefault(x => x.Value == value) ?? throw new NotFoundException("String does not exist in the system");
+            return InMemoryStore.InMemoryStores.FirstOrDefault(x => x.Value == value);
         }
         public QueryResponseDto GetByQuery(QueryStringDto stringDto)
         {
