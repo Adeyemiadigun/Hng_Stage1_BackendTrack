@@ -35,7 +35,7 @@ namespace Hng_Stage1_BackendTrack.Services
 
             var model = new StringModel
             {
-                Id = hash
+                Id = hash,
                 Value = input,
                 length = input.Length,
                 IsPalindrome = isPalindrome,
@@ -87,7 +87,7 @@ namespace Hng_Stage1_BackendTrack.Services
 
             return new StringResponseDto
             {
-                Id = model.ShaHash,
+                Id = model.Id,
                 Value = model.Value,
                 Created_At = model.CreatedAt,
                 Properties = new PropertiesDto
