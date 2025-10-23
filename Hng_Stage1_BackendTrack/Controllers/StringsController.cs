@@ -8,7 +8,7 @@ namespace Hng_Stage1_BackendTrack.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class Strings(StringAnalyzerService _stringService) : ControllerBase
+    public class StringsController(StringAnalyzerService _stringService) : ControllerBase
     {
         [HttpPost]
         public IActionResult ProcessString([FromBody] PostStringDto value)
@@ -23,7 +23,7 @@ namespace Hng_Stage1_BackendTrack.Controllers
 
             if (response == null)
                 return Conflict(new { error = "String already exists" });
-            return CreatedAtAction("String analyzed and Saved Successfully", response);
+            return CreatedAtAction(nameof(GetString), new { string_value = response.Value }, response);
         }
         [HttpGet("{string_value}")]
         public IActionResult GetString(string string_value)
@@ -43,14 +43,20 @@ namespace Hng_Stage1_BackendTrack.Controllers
         [HttpGet("filter-by-natural-language")]
         public IActionResult FilterByNaturalLanguage([FromQuery] string query)
         {
-            
-                var result = _stringService.FilterByNaturalLanguage(query);
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest();
+            var result = _stringService.FilterByNaturalLanguage(query);
                 return Ok(result);
         }
         [HttpDelete("{string_value}")]
         public IActionResult DeleteString(string string_value)
         {
-             _stringService.DeleteString(string_value);
+            if (string.IsNullOrWhiteSpace(string_value))
+                return BadRequest();
+            var res =_stringService.DeleteString(string_value);
+            if (!res)
+                return NotFound();
+
             return NoContent();
         }
     }

@@ -20,14 +20,17 @@ namespace Hng_Stage1_BackendTrack.Services
 
             var newString = new StringModel
             {
+                Id = hash,
+                Value = value,
                 length = value.Length,
                 IsPalindrome = string.Equals(value, new string(value.Reverse().ToArray()), StringComparison.OrdinalIgnoreCase),
                 UniqueCharacterCount = value.ToLower().Distinct().Count(),
                 WordCount = value.Split(" ", StringSplitOptions.RemoveEmptyEntries).Length,
                 CharacterFrequencyMap = value.GroupBy(c => c).ToDictionary(g => g.Key.ToString(), g => g.Count()),
-                ShaHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLower(),
+                ShaHash = hash,
 
             };
+            InMemoryStore.InMemoryStores.Add(newString);
             return newString;
         }
         public StringModel GetByValue(string value)
@@ -50,9 +53,9 @@ namespace Hng_Stage1_BackendTrack.Services
                 if (stringDto.word_count.HasValue && x.WordCount != stringDto.word_count.Value)
                     return false;
 
-                if (!char.IsWhiteSpace(stringDto.contains_character.Value) || stringDto.contains_character is null &&
-                    !x.Value.Contains(stringDto.contains_character.Value))
+                if (stringDto.contains_character.HasValue &&!x.Value.Contains(stringDto.contains_character.Value))
                     return false;
+
 
                 return true;
             };
@@ -88,8 +91,7 @@ namespace Hng_Stage1_BackendTrack.Services
         }
         public NaturalLanguageFilterResponseDto FilterByNaturalLanguage(string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
-                throw new ArgumentException("Query cannot be empty");
+           
 
             query = query.ToLowerInvariant();
             var filters = new ParsedFiltersDto();
@@ -138,14 +140,13 @@ namespace Hng_Stage1_BackendTrack.Services
                 }
             };
         }
-        public void DeleteString(string value)
+        public bool DeleteString(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new BadRequestException("String value cannot be null or empty");
             var stringToDelete = InMemoryStore.InMemoryStores.FirstOrDefault(x => x.Value == value);
-            if (stringToDelete == null)
-                throw new NotFoundException("String not found in the system");
+            if (stringToDelete is null)
+                return false;
             InMemoryStore.InMemoryStores.Remove(stringToDelete);
+            return true;
         }
     }
 }
