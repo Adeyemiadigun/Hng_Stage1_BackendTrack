@@ -25,15 +25,8 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Optional: serve Swagger in production for demo/testing
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-// Disable HTTPS redirection in Railway
-if (!app.Environment.IsProduction())
-{
-    app.UseHttpsRedirection();
 }
 
 
