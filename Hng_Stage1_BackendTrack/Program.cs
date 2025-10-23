@@ -12,6 +12,12 @@ builder.Services.AddEndpointsApiExplorer(); // <-- Important
 builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<StringAnalyzerService>();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // prevent camelCase
+    });
+
 var app = builder.Build();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";

@@ -43,19 +43,37 @@ namespace Hng_Stage1_BackendTrack.Dtos
 
     public class StringResponseDto
     {
+        [JsonPropertyName("id")]
         public string Id { get; set; }
+
+        [JsonPropertyName("value")]
         public string Value { get; set; }
+
+        [JsonPropertyName("properties")]
         public PropertiesDto Properties { get; set; }
+
+        [JsonPropertyName("created_at")]
         public DateTime Created_At { get; set; }
     }
 
     public class PropertiesDto
     {
+        [JsonPropertyName("length")]
         public int Length { get; set; }
+
+        [JsonPropertyName("is_palindrome")]
         public bool Is_Palindrome { get; set; }
+
+        [JsonPropertyName("unique_characters")]
         public int Unique_Characters { get; set; }
+
+        [JsonPropertyName("word_count")]
         public int Word_Count { get; set; }
+
+        [JsonPropertyName("sha256_hash")]
         public string Sha256_Hash { get; set; }
+
+        [JsonPropertyName("character_frequency_map")]
         public Dictionary<char, int> Character_Frequency_Map { get; set; }
     }
 
