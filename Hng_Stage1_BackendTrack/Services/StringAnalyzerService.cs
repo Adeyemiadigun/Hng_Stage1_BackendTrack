@@ -101,7 +101,6 @@ namespace Hng_Stage1_BackendTrack.Services
                 }
             };
         }
-
         public QueryResponseDto GetByQuery(QueryStringDto stringDto)
         {
             var data = InMemoryStore.InMemoryStores
