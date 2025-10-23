@@ -46,7 +46,9 @@ namespace Hng_Stage1_BackendTrack.Controllers
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest();
             var result = _stringService.FilterByNaturalLanguage(query);
-                return Ok(result);
+            if (result == null)
+                return BadRequest(new { error = "Unable to parse natural language query" });
+            return Ok(result);
         }
         [HttpDelete("{string_value}")]
         public IActionResult DeleteString(string string_value)
