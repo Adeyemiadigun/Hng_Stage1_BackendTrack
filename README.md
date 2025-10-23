@@ -186,8 +186,8 @@ Natural-Language filtering
 
 Parses human phrases using regex/keywords and maps them to filter parameters.
 
-☁️ Deployment (PXXL App)
-Create a new project on https://pxxl.app
+☁️ Deployment (Railway App)
+Create a new project on https://railway.com
 
 Link your GitHub repo
 
@@ -195,8 +195,8 @@ Set your environment variable:
 
 ini
 Copy code
-PORT=5064
-Deploy and copy the generated public URL (e.g. https://yourapp.pxxl.app)
+PORT=8080
+Deploy and copy the generated public URL 
 
 🧑‍💻 Author
 
