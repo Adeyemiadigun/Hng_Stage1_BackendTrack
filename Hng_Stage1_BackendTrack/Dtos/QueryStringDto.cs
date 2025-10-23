@@ -49,14 +49,14 @@ namespace Hng_Stage1_BackendTrack.Dtos
         [JsonPropertyName("length")]
         public int Length { get; set; }
 
+        [JsonPropertyName("is_palindrome")]
+        public bool IsPalindrome { get; set; }
+
         [JsonPropertyName("word_count")]
         public int WordCount { get; set; }
 
         [JsonPropertyName("character_count")]
         public int CharacterCount { get; set; }
-
-        [JsonPropertyName("is_palindrome")]
-        public bool IsPalindrome { get; set; }
 
         [JsonPropertyName("sha256_hash")]
         public string Sha256Hash { get; set; } = string.Empty;

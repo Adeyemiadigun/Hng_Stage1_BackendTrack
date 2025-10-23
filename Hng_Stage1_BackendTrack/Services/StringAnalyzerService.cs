@@ -11,38 +11,47 @@ namespace Hng_Stage1_BackendTrack.Services
 {
     public class StringAnalyzerService
     {
-        public StringResponseDto AnalyzeString(string value)
+        public StringResponseDto AnalyzeString(string input)
         {
-           
+            input = input.Trim();
 
-            string hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLower();
-            if (InMemoryStore.InMemoryStores.Any(x => x.ShaHash == hash))
+            // Prevent duplicates (case-insensitive)
+            if (InMemoryStore.InMemoryStores.Any(x =>
+                x.Value.Equals(input, StringComparison.OrdinalIgnoreCase)))
                 return null;
 
-            var newString = new StringModel
+            var response = new StringModel
             {
-                Id = hash,
-                Value = value,
-                length = value.Length,
-                IsPalindrome = string.Equals(value, new string(value.Reverse().ToArray()), StringComparison.OrdinalIgnoreCase),
-                UniqueCharacterCount = value.ToLower().Distinct().Count(),
-                WordCount = value.Split(" ", StringSplitOptions.RemoveEmptyEntries).Length,
-                CharacterFrequencyMap = value.GroupBy(c => c).ToDictionary(g => g.Key.ToString(), g => g.Count()),
-                ShaHash = hash,
-
+                Value = input,
+                length = input.Length,
+                IsPalindrome = string.Equals(
+                    input,
+                    new string(input.Reverse().ToArray()),
+                    StringComparison.OrdinalIgnoreCase),
+                WordCount = input.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length,
+                UniqueCharacterCount = input.Replace(" ", "").Length,
+                ShaHash = ComputeSha256(input)
             };
-            InMemoryStore.InMemoryStores.Add(newString);
 
-            return new StringResponseDto()
+            InMemoryStore.InMemoryStores.Add(response);
+
+            return new StringResponseDto
             {
-                Value = newString.Value,
-                Length = newString.length,
-                WordCount = newString.WordCount,
-                CharacterCount = newString.UniqueCharacterCount,
-                IsPalindrome = newString.IsPalindrome,
-                Sha256Hash = newString.ShaHash
+                Value = response.Value,
+                Length = response.length,
+                WordCount = response.WordCount,
+                CharacterCount = response.UniqueCharacterCount,
+                IsPalindrome = response.IsPalindrome,
+                Sha256Hash = response.ShaHash
             };
         }
+        private static string ComputeSha256(string input)
+        {
+            using var sha = SHA256.Create();
+            var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
         public StringResponseDto GetByValue(string value)
         {
             return InMemoryStore.InMemoryStores.Select(x => new StringResponseDto()
@@ -57,31 +66,15 @@ namespace Hng_Stage1_BackendTrack.Services
         }
         public QueryResponseDto GetByQuery(QueryStringDto stringDto)
         {
-            Func<StringModel, bool> filter = x =>
-            {
-                if (stringDto.is_palindrome.HasValue && x.IsPalindrome != stringDto.is_palindrome.Value)
-                    return false;
-
-                if (stringDto.min_length.HasValue && x.length < stringDto.min_length.Value)
-                    return false;
-
-                if (stringDto.max_length.HasValue && x.length > stringDto.max_length.Value)
-                    return false;
-
-                if (stringDto.word_count.HasValue && x.WordCount != stringDto.word_count.Value)
-                    return false;
-
-                if (stringDto.contains_character.HasValue)
-                {
-                    var c = stringDto.contains_character.Value;
-                    if (!x.Value.Contains(c, StringComparison.OrdinalIgnoreCase))
-                        return false;
-                }
-
-                return true;
-            };
-
-            var data = InMemoryStore.InMemoryStores.Where(filter).ToList();
+            var data = InMemoryStore.InMemoryStores
+                .Where(x =>
+                    (!stringDto.is_palindrome.HasValue || x.IsPalindrome == stringDto.is_palindrome.Value) &&
+                    (!stringDto.min_length.HasValue || x.length >= stringDto.min_length.Value) &&
+                    (!stringDto.max_length.HasValue || x.length <= stringDto.max_length.Value) &&
+                    (!stringDto.word_count.HasValue || x.WordCount == stringDto.word_count.Value) &&
+                    (string.IsNullOrWhiteSpace(stringDto.contains_character?.ToString()) ||
+                     x.Value.Contains(stringDto.contains_character.Value.ToString(), StringComparison.OrdinalIgnoreCase))
+                ).ToList();
 
             return new QueryResponseDto
             {
@@ -89,6 +82,7 @@ namespace Hng_Stage1_BackendTrack.Services
                 Filters_Applied = GetAppliedFilters(stringDto)
             };
         }
+
 
         private Dictionary<string, object> GetAppliedFilters(QueryStringDto stringDto)
         {
