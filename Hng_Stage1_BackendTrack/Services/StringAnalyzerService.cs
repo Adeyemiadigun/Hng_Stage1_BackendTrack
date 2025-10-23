@@ -20,31 +20,50 @@ namespace Hng_Stage1_BackendTrack.Services
                 x.Value.Equals(input, StringComparison.OrdinalIgnoreCase)))
                 return null;
 
-            var response = new StringModel
+            var hash = ComputeSha256(input);
+            var isPalindrome = string.Equals(
+                input,
+                new string(input.Reverse().ToArray()),
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            var characterFrequency = input
+                .ToLower()
+                .Where(char.IsLetterOrDigit)
+                .GroupBy(c => c)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var model = new StringModel
             {
+                Id = hash
                 Value = input,
                 length = input.Length,
-                IsPalindrome = string.Equals(
-                    input,
-                    new string(input.Reverse().ToArray()),
-                    StringComparison.OrdinalIgnoreCase),
+                IsPalindrome = isPalindrome,
                 WordCount = input.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length,
-                UniqueCharacterCount = input.Replace(" ", "").Length,
-                ShaHash = ComputeSha256(input)
+                UniqueCharacterCount = input.ToLower().Where(char.IsLetterOrDigit).Distinct().Count(),
+                ShaHash = hash,
+                CreatedAt = DateTime.UtcNow
             };
 
-            InMemoryStore.InMemoryStores.Add(response);
+            InMemoryStore.InMemoryStores.Add(model);
 
             return new StringResponseDto
             {
-                Value = response.Value,
-                Length = response.length,
-                WordCount = response.WordCount,
-                CharacterCount = response.UniqueCharacterCount,
-                IsPalindrome = response.IsPalindrome,
-                Sha256Hash = response.ShaHash
+                Id = model.Id,
+                Value = input,
+                Created_At = model.CreatedAt,
+                Properties = new PropertiesDto
+                {
+                    Length = model.length,
+                    Is_Palindrome = model.IsPalindrome,
+                    Unique_Characters = model.UniqueCharacterCount,
+                    Word_Count = model.WordCount,
+                    Sha256_Hash = model.ShaHash,
+                    Character_Frequency_Map = characterFrequency
+                }
             };
         }
+
         private static string ComputeSha256(string input)
         {
             using var sha = SHA256.Create();
@@ -54,16 +73,35 @@ namespace Hng_Stage1_BackendTrack.Services
 
         public StringResponseDto GetByValue(string value)
         {
-            return InMemoryStore.InMemoryStores.Select(x => new StringResponseDto()
+            var model = InMemoryStore.InMemoryStores
+                .FirstOrDefault(x => x.Value.Equals(value, StringComparison.OrdinalIgnoreCase));
+
+            if (model == null)
+                return null;
+
+            var characterFrequency = model.Value
+                .ToLower()
+                .Where(char.IsLetterOrDigit)
+                .GroupBy(c => c)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return new StringResponseDto
             {
-                Value = x.Value,
-                Length = x.length,
-                WordCount = x.WordCount,
-                CharacterCount = x.UniqueCharacterCount,
-                IsPalindrome = x.IsPalindrome,
-                Sha256Hash = x.ShaHash
-            }).FirstOrDefault(x => x.Value == value)!;
+                Id = model.ShaHash,
+                Value = model.Value,
+                Created_At = model.CreatedAt,
+                Properties = new PropertiesDto
+                {
+                    Length = model.length,
+                    Is_Palindrome = model.IsPalindrome,
+                    Unique_Characters = model.UniqueCharacterCount,
+                    Word_Count = model.WordCount,
+                    Sha256_Hash = model.ShaHash,
+                    Character_Frequency_Map = characterFrequency
+                }
+            };
         }
+
         public QueryResponseDto GetByQuery(QueryStringDto stringDto)
         {
             var data = InMemoryStore.InMemoryStores
