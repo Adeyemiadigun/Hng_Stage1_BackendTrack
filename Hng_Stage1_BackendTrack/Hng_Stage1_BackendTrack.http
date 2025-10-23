@@ -1,0 +1,6 @@
+@Hng_Stage1_BackendTrack_HostAddress = http://localhost:5064
+
+GET {{Hng_Stage1_BackendTrack_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
