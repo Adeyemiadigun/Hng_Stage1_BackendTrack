@@ -23,8 +23,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    // Optional: serve Swagger in production for demo/testing
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirection in Railway
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
